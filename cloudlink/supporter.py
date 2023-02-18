@@ -84,46 +84,46 @@ class supporter:
         if (type(keys) != dict) or (type(payload) != dict):
             return self.not_a_dict
         
-        self.log_debug(f"Running validator: {keys}, {payload}, {optional}, {sizes}")
+        self.log_debug("Running validator: "+keys+", "+payload+", "+optional+", "+sizes)
 
         for key in keys.keys():
             # Check if a key is present
             if (key in payload) or (key in optional):
                 # Bypass checks if a key is optional and not present
                 if (key not in payload) and (key in optional):
-                    self.log_debug(f"Validator: Payload {payload} key {key} is optional")
+                    self.log_debug("Validator: Payload "+payload+" key "+key+ "is optional")
                     continue
 
                 # Check if there are multiple supported datatypes for a key
                 if type(keys[key]) == list:
                     # Validate key datatype
                     if not type(payload[key]) in keys[key]:
-                        self.log_debug(f"Validator: Payload {payload} key {key} value is invalid type. Expecting {keys[key]}, got {type(payload[key])}")
+                        self.log_debug("Validator: Payload {payload} key {key} value is invalid type. Expecting {keys[key]}, got {type(payload[key])}")
                         return self.invalid
 
                     # Check if the size of the payload is too large 
                     if sizes:
                         if (key in sizes.keys()) and (len(str(payload[key])) > sizes[key]):
-                            self.log_debug(f"Validator: Payload {payload} key {key} value is too large")
+                            self.log_debug("Validator: Payload {payload} key {key} value is too large")
                             return self.too_large
 
                 else:
                     # Validate key datatype
                     if type(payload[key]) != keys[key]:
-                        self.log_debug(f"Validator: Payload {payload} key {key} value is invalid type. Expecting {keys[key]}, got {type(payload[key])}")
+                        self.log_debug("Validator: Payload {payload} key {key} value is invalid type. Expecting {keys[key]}, got {type(payload[key])}")
                         return self.invalid
 
                     # Check if the size of the payload is too large 
                     if sizes:
                         if (key in sizes.keys()) and (len(str(payload[key])) > sizes[key]):
-                            self.log_debug(f"Validator: Payload {payload} key {key} value is too large")
+                            self.log_debug("Validator: Payload {payload} key {key} value is too large")
                             return self.too_large
             else:
-                self.log_debug(f"Validator: Payload {payload} is missing key {key}")
+                self.log_debug("Validator: Payload {payload} is missing key {key}")
                 return self.missing_key
 
         # Hooray, the message is sane
-        self.log_debug(f"Validator: Payload {payload} is valid")
+        self.log_debug("Validator: Payload {payload} is valid")
         return self.valid
 
     def full_stack(self):
@@ -165,7 +165,7 @@ class supporter:
     def generate_statuscode(self, code: str):
         if code in self.codes:
             c_type, c_code, c_msg = self.codes[code]
-            return f"{c_type}:{c_code} | {c_msg}", c_code
+            return "{c_type}:{c_code} | {c_msg}", c_code
         else:
             raise ValueError
 

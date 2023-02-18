@@ -66,14 +66,15 @@ class server:
         self.scratch_methods = scratch_methods(self)
         
         # Display version
-        self.supporter.log(f"Cloudlink server v{parent.version}")
+        self.supporter.log("Cloudlink server v{parent.version}")
 
     # == Public API functionality ==
 
     # Runs the server.
     def run(self, ip: str = "localhost", port: int = 3000):
         try:
-            self.asyncio.run(self.__run__(ip, port))
+            loop = self.asyncio.get_event_loop()
+            loop.run_until_complete(self.__run__(ip, port))
         except KeyboardInterrupt:
             pass
 
@@ -283,7 +284,7 @@ class server:
         if room_id:
             message["rooms"] = room_id
 
-        self.supporter.log_debug(f"Multicasting payload: {message}")
+        self.supporter.log_debug("Multicasting payload: {message}")
 
         # Send payload
         self.websockets.broadcast(tmp_clients, self.json.dumps(message))
@@ -314,13 +315,13 @@ class server:
         if room_id:
             message["rooms"] = room_id
 
-        self.supporter.log_debug(f"Unicasting payload: {message}")
+        self.supporter.log_debug("Unicasting payload: {message}")
 
         # Send payload
         try:
             await client.send(self.json.dumps(message))
         except self.websockets.exceptions.ConnectionClosedError:
-            self.supporter.log_error(f"Failed to send packet to client {client.id}: Connection closed unexpectedly")
+            self.supporter.log_error("Failed to send packet to client {client.id}: Connection closed unexpectedly")
 
     # Unicast status codes - Only used for statuscode.
     async def send_code(self, client: type, code: str, extra_data: dict = None, listener: str = None):
@@ -346,13 +347,13 @@ class server:
         if listener:
             message["listener"] = listener
 
-        self.supporter.log_debug(f"Sending payload: {message}")
+        self.supporter.log_debug("Sending payload: {message}")
 
         # Send payload
         try:
             await client.send(self.json.dumps(message))
         except self.websockets.exceptions.ConnectionClosedError:
-            self.supporter.log_error(f"Failed to send status code to client {client.id}: Connection closed unexpectedly")
+            self.supporter.log_error("Failed to send status code to client {client.id}: Connection closed unexpectedly")
 
     # == Server functionality ==
 
@@ -476,7 +477,7 @@ class server:
             return await self.__scratch_method_handler__(client, message)
 
         else:
-            raise TypeError(f"Unknown protocol type: {client.protocol}")
+            raise TypeError("Unknown protocol type: {client.protocol}")
 
     async def __handler__(self, client):
         if self.check_ip_addresses:
@@ -487,10 +488,10 @@ class server:
         if self.reject_clients:
             rejected = True
             await client.close(code=1013, reason="Reject mode is enabled")
-            self.supporter.log(f"Client disconnected in reject mode: {client.full_ip}")
+            self.supporter.log("Client disconnected in reject mode: {client.full_ip}")
         elif self.check_ip_addresses and (client.full_ip in self.ip_blocklist):
             rejected = True
-            self.supporter.log(f"Client rejected: IP address {client.full_ip} blocked")
+            self.supporter.log("Client rejected: IP address {client.full_ip} blocked")
             await client.close(code=1008, reason="IP blocked")
 
         # Do absolutely nothing if the client was rejected
@@ -513,9 +514,9 @@ class server:
             
             # Log event
             if self.check_ip_addresses:
-                self.supporter.log(f"Client {client.id} connected: {client.full_ip}")
+                self.supporter.log("Client {client.id} connected: {client.full_ip}")
             else:
-                self.supporter.log(f"Client {client.id} connected")
+                self.supporter.log("Client {client.id} connected")
             
             # Fire events
             self.__fire_event__(self.events.on_connect, client)
@@ -603,7 +604,7 @@ class server:
 
             # Handle unexpected exceptions
             except Exception as e:
-                self.supporter.log_error(f"Exception was raised: \"{e}\"\n{self.supporter.full_stack()}")
+                self.supporter.log_error("Exception was raised: \"{e}\"\n{self.supporter.full_stack()}")
                 await client.close(code=1011, reason="Unexpected exception was raised")
 
             # Gracefully shutdown the handler
@@ -636,9 +637,9 @@ class server:
                 
                 # Log event
                 if self.check_ip_addresses:
-                    self.supporter.log(f"Client {client.id} disconnected: {client.full_ip} - Code {client.close_code} and reason \"{client.close_reason}\"")
+                    self.supporter.log("Client {client.id} disconnected: {client.full_ip} - Code {client.close_code} and reason \"{client.close_reason}\"")
                 else:
-                    self.supporter.log(f"Client {client.id} disconnected: Code {client.close_code} and reason \"{client.close_reason}\"")
+                    self.supporter.log("Client {client.id} disconnected: Code {client.close_code} and reason \"{client.close_reason}\"")
 
 
 # Class to store custom methods
@@ -687,7 +688,7 @@ class clients:
         elif protocol == self.__proto_scratch_cloud__:
                 self.__all_scratch__.add(client)
         else:
-                raise TypeError(f"Unsupported protocol ID: {protocol}")
+                raise TypeError("Unsupported protocol ID: {protocol}")
 
         if self.exists(client):
             self.get(client).protocol = protocol
@@ -729,7 +730,7 @@ class clients:
             elif self.get(client).protocol ==  self.__proto_unset__:
                     pass
             else:
-                    raise TypeError(f"Unsupported protocol ID: {self.get(client).protocol}")
+                    raise TypeError("Unsupported protocol ID: {self.get(client).protocol}")
 
             # Remove the username from the userlist
             if client.username_set:

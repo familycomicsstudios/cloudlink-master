@@ -109,22 +109,22 @@ class scratch_methods:
         # Handshake request will be determined "failed" if the server terminates the connection
 
         if not len(message["user"]) in range(1, 21):
-            await client.close(code=self.supporter.connection_error, reason=f"Invalid username: {message['user']}")
+            await client.close(code=self.supporter.connection_error, reason="Invalid username: {message['user']}")
             return
 
         if not len(message["project_id"]) in range(1, 101):
-            await client.close(code=self.supporter.connection_error, reason=f"Invalid room ID: {message['project_id']}")
+            await client.close(code=self.supporter.connection_error, reason="Invalid room ID: {message['project_id']}")
             return
 
         if not len(message["project_id"]) in range(1, 101):
-            await client.close(code=self.supporter.connection_error, reason=f"Invalid room ID: {message['project_id']}")
+            await client.close(code=self.supporter.connection_error, reason="Invalid room ID: {message['project_id']}")
             return
 
         if ("scratchsessionsid" in client.request_headers) or ("scratchsessionsid" in client.response_headers):
             await client.send(
                 "The cloud data library you are using is putting your Scratch account at risk by sending us your login token for no reason. Change your Scratch password immediately, then contact the maintainers of that library for further information. This connection is being refused to protect your security.")
             await self.parent.asyncio.sleep(0.1)
-            await client.close(code=self.supporter.refused_security, reason=f"Connection closed for security reasons")
+            await client.close(code=self.supporter.refused_security, reason="Connection closed for security reasons")
             return
 
         # Create the project room
@@ -142,11 +142,11 @@ class scratch_methods:
 
         result = self.parent.clients.set_username(client, message["user"])
         if result != self.supporter.username_set:
-            await client.close(code=self.supporter.username_error, reason=f"Username conflict")
+            await client.close(code=self.supporter.username_error, reason="Username conflict")
             return
 
         if client.friendly_username in room.usernames:
-            await client.close(code=self.supporter.username_error, reason=f"Username conflict")
+            await client.close(code=self.supporter.username_error, reason="Username conflict")
             return
 
         room.usernames.add(client.friendly_username)
